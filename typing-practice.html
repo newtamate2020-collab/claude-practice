@@ -110,15 +110,6 @@
       border-radius: 6px;
     }
 
-    .kanji-text {
-      color: #888;
-      font-size: 0.95em;
-      margin-bottom: 16px;
-      padding: 12px 16px;
-      background-color: #f0f4ff;
-      border-radius: 8px;
-    }
-
     /* 見本の文章と入力欄を横に並べる */
     .typing-area {
       display: flex;
@@ -265,8 +256,6 @@
         <span id="mistake-label">ミス: 0</span>
       </div>
 
-      <div class="kanji-text" id="reading-hint"></div>
-
       <div class="typing-area">
         <div class="sample-text" id="sample-text"></div>
         <textarea id="typing-input" placeholder="ここをクリックして、IMEで日本語を入力してください" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
@@ -304,27 +293,26 @@
   </footer>
 
   <script>
-    // 練習に使うことわざ一覧(漢字・読み)
+    // 練習に使うことわざ一覧
     const PROVERBS = [
-      { kanji: "猿も木から落ちる", reading: "さるもきからおちる" },
-      { kanji: "石の上にも三年", reading: "いしのうえにもさんねん" },
-      { kanji: "七転び八起き", reading: "ななころびやおき" },
-      { kanji: "花より団子", reading: "はなよりだんご" },
-      { kanji: "案ずるより産むが易し", reading: "あんずるよりうむがやすし" },
-      { kanji: "塵も積もれば山となる", reading: "ちりもつもればやまとなる" },
-      { kanji: "光陰矢の如し", reading: "こういんやのごとし" },
-      { kanji: "二兎を追う者は一兎をも得ず", reading: "にとをおうものはいっとをもえず" },
-      { kanji: "井の中の蛙大海を知らず", reading: "いのなかのかわずたいかいをしらず" },
-      { kanji: "覆水盆に返らず", reading: "ふくすいぼんにかえらず" },
-      { kanji: "千里の道も一歩から", reading: "せんりのみちもいっぽから" },
-      { kanji: "良薬は口に苦し", reading: "りょうやくはくちににがし" },
-      { kanji: "灯台下暗し", reading: "とうだいもとくらし" },
-      { kanji: "継続は力なり", reading: "けいぞくはちからなり" },
-      { kanji: "早起きは三文の徳", reading: "はやおきはさんもんのとく" },
+      { kanji: "猿も木から落ちる" },
+      { kanji: "石の上にも三年" },
+      { kanji: "七転び八起き" },
+      { kanji: "花より団子" },
+      { kanji: "案ずるより産むが易し" },
+      { kanji: "塵も積もれば山となる" },
+      { kanji: "光陰矢の如し" },
+      { kanji: "二兎を追う者は一兎をも得ず" },
+      { kanji: "井の中の蛙大海を知らず" },
+      { kanji: "覆水盆に返らず" },
+      { kanji: "千里の道も一歩から" },
+      { kanji: "良薬は口に苦し" },
+      { kanji: "灯台下暗し" },
+      { kanji: "継続は力なり" },
+      { kanji: "早起きは三文の徳" },
     ];
 
     let target = "";
-    let readingHint = "";
     let sessionStarted = false;
     let startTime = 0;
     let mistakeCount = 0;
@@ -344,7 +332,6 @@
     // 指定した文字数になるまで、ことわざをランダムにつなげて文章を作る
     function generateText(targetLength) {
       const kanjiParts = [];
-      const readingParts = [];
       let total = 0;
       let pool = shuffle(PROVERBS);
       let i = 0;
@@ -356,20 +343,14 @@
         }
         const item = pool[i++];
         kanjiParts.push(item.kanji + "。");
-        readingParts.push(item.reading);
         total += item.kanji.length + 1;
       }
 
-      return {
-        text: kanjiParts.join(""),
-        readingHint: readingParts.join(" ・ "),
-      };
+      return kanjiParts.join("");
     }
 
     function startGame(count) {
-      const generated = generateText(count);
-      target = generated.text;
-      readingHint = generated.readingHint;
+      target = generateText(count);
 
       sessionStarted = false;
       mistakeCount = 0;
@@ -380,7 +361,6 @@
       document.getElementById("result-screen").style.display = "none";
       document.getElementById("play-screen").style.display = "block";
 
-      document.getElementById("reading-hint").textContent = "よみ: " + readingHint;
       document.getElementById("timer-label").textContent = "時間: 00:00";
       document.getElementById("mistake-label").textContent = "ミス: 0";
 
