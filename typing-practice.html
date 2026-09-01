@@ -119,6 +119,29 @@
       border-radius: 8px;
     }
 
+    /* 見本の文章と入力欄を横に並べる */
+    .typing-area {
+      display: flex;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .typing-area > * {
+      flex: 1 1 0;
+      min-width: 0;
+      box-sizing: border-box;
+      height: 320px;
+    }
+
+    @media (max-width: 700px) {
+      .typing-area {
+        flex-direction: column;
+      }
+      .typing-area > * {
+        height: 200px;
+      }
+    }
+
     .sample-text {
       font-family: "Courier New", monospace;
       font-size: 1.4em;
@@ -126,9 +149,10 @@
       background-color: #f5f5f7;
       border-radius: 8px;
       padding: 20px;
-      margin-bottom: 16px;
+      margin: 0;
       line-height: 1.9;
       word-break: break-all;
+      overflow-y: auto;
     }
 
     .char-correct {
@@ -152,7 +176,6 @@
 
     #typing-input {
       width: 100%;
-      box-sizing: border-box;
       font-family: "Courier New", monospace;
       font-size: 1.3em;
       letter-spacing: 1px;
@@ -160,7 +183,7 @@
       border: 2px solid #ddd;
       border-radius: 8px;
       resize: none;
-      height: 100px;
+      margin: 0;
     }
 
     #typing-input:focus {
@@ -244,9 +267,10 @@
 
       <div class="kanji-text" id="reading-hint"></div>
 
-      <div class="sample-text" id="sample-text"></div>
-
-      <textarea id="typing-input" placeholder="ここをクリックして、IMEで日本語を入力してください" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <div class="typing-area">
+        <div class="sample-text" id="sample-text"></div>
+        <textarea id="typing-input" placeholder="ここをクリックして、IMEで日本語を入力してください" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      </div>
     </div>
 
     <!-- 結果画面 -->
