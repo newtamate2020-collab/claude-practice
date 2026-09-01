@@ -256,6 +256,7 @@
         <span id="timer-label">時間: 00:00</span>
         <span id="progress-label">0 / 0 文字</span>
         <span id="mistake-label">ミス: 0</span>
+        <button id="sound-toggle" class="secondary" onclick="toggleSound()" style="margin: 0; padding: 6px 14px;">🔊 音</button>
       </div>
 
       <div class="typing-area">
@@ -352,6 +353,54 @@
       return parts.join("");
     }
 
+    // --- サウンド ---
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function ensureAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playTone(freq, duration, type, volume) {
+      if (!soundEnabled) return;
+      const ctx = ensureAudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.value = volume;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.stop(ctx.currentTime + duration);
+    }
+
+    function playCorrectSound() {
+      playTone(700, 0.05, "sine", 0.08);
+    }
+
+    function playMistakeSound() {
+      playTone(180, 0.12, "square", 0.12);
+    }
+
+    function playFinishSound() {
+      playTone(523, 0.15, "sine", 0.12);
+      setTimeout(() => playTone(659, 0.15, "sine", 0.12), 150);
+      setTimeout(() => playTone(784, 0.3, "sine", 0.12), 300);
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById("sound-toggle").textContent = soundEnabled ? "🔊 音" : "🔇 音";
+    }
+
     function startGame(count) {
       target = generateText(count);
 
@@ -414,11 +463,18 @@
 
       if (value.length > prevValueLength) {
         // 新しく確定した文字ぶんをまとめて判定する(IMEは複数文字を一度に確定することがある)
+        let hadMistake = false;
         for (let idx = prevValueLength; idx < value.length && idx < target.length; idx++) {
           totalKeyPresses++;
           if (value[idx] !== target[idx]) {
             mistakeCount++;
+            hadMistake = true;
           }
+        }
+        if (hadMistake) {
+          playMistakeSound();
+        } else {
+          playCorrectSound();
         }
         if (!sessionStarted) {
           sessionStarted = true;
@@ -442,6 +498,7 @@
       document.getElementById("typing-input").disabled = true;
       document.getElementById("play-screen").style.display = "none";
       document.getElementById("result-screen").style.display = "block";
+      playFinishSound();
 
       const elapsedSeconds = sessionStarted
         ? (performance.now() - startTime) / 1000
