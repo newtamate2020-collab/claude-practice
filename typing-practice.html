@@ -272,6 +272,7 @@
     <!-- 結果画面 -->
     <div class="card" id="result-screen">
       <h2>結果発表 🎉</h2>
+      <p id="perfect-message" style="display:none; font-weight:bold; color:#ef233c; font-size:1.1em;">🎉 ノーミスで完璧です!おめでとうございます!</p>
       <div class="result-numbers">
         <div class="result-item">
           <div class="value" id="result-speed">0</div>
@@ -398,14 +399,25 @@
       playTone(1200, 0.05, "sine", 0.18);
     }
 
-    function playMistakeSound() {
-      playTone(180, 0.14, "square", 0.22);
-    }
-
     function playFinishSound() {
       playTone(523, 0.15, "sine", 0.2);
       setTimeout(() => playTone(659, 0.15, "sine", 0.2), 150);
       setTimeout(() => playTone(784, 0.3, "sine", 0.2), 300);
+    }
+
+    // ノーミスで完走したときの、お祝いの音楽
+    function playCongratsSound() {
+      const melody = [
+        { freq: 523, time: 0 },
+        { freq: 659, time: 130 },
+        { freq: 784, time: 260 },
+        { freq: 1046, time: 390 },
+        { freq: 1318, time: 560 },
+      ];
+      melody.forEach(({ freq, time }, idx) => {
+        const duration = idx === melody.length - 1 ? 0.5 : 0.16;
+        setTimeout(() => playTone(freq, duration, "triangle", 0.25), time);
+      });
     }
 
     function toggleSound() {
@@ -481,18 +493,11 @@
 
       if (value.length > prevValueLength) {
         // 新しく確定した文字ぶんをまとめて判定する(IMEは複数文字を一度に確定することがある)
-        let hadMistake = false;
         for (let idx = prevValueLength; idx < value.length && idx < target.length; idx++) {
           totalKeyPresses++;
           if (value[idx] !== target[idx]) {
             mistakeCount++;
-            hadMistake = true;
           }
-        }
-        if (hadMistake) {
-          playMistakeSound();
-        } else {
-          playCorrectSound();
         }
         if (!sessionStarted) {
           sessionStarted = true;
@@ -516,7 +521,14 @@
       document.getElementById("typing-input").disabled = true;
       document.getElementById("play-screen").style.display = "none";
       document.getElementById("result-screen").style.display = "block";
-      playFinishSound();
+
+      document.getElementById("perfect-message").style.display = mistakeCount === 0 ? "block" : "none";
+
+      if (mistakeCount === 0) {
+        playCongratsSound();
+      } else {
+        playFinishSound();
+      }
 
       const elapsedSeconds = sessionStarted
         ? (performance.now() - startTime) / 1000
