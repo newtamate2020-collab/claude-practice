@@ -32,7 +32,7 @@
     }
 
     main {
-      max-width: 700px;
+      max-width: 800px;
       margin: 0 auto;
       padding: 30px 20px;
     }
@@ -43,6 +43,9 @@
       padding: 30px;
       margin-bottom: 24px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    #start-screen {
       text-align: center;
     }
 
@@ -70,6 +73,22 @@
       background-color: #454873;
     }
 
+    .custom-count {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .custom-count input[type="number"] {
+      width: 100px;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-right: 8px;
+      text-align: center;
+    }
+
     /* プレイ中の画面 */
     #play-screen {
       display: none;
@@ -81,38 +100,45 @@
       font-size: 0.95em;
       color: #666;
       margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .status-bar span {
+      background-color: #f5f5f7;
+      padding: 6px 12px;
+      border-radius: 6px;
     }
 
     .kanji-text {
-      font-size: 1.6em;
-      font-weight: bold;
-      color: #2b2d42;
-      margin-bottom: 6px;
-    }
-
-    .reading-text {
       color: #888;
-      margin-bottom: 20px;
+      font-size: 0.95em;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background-color: #f0f4ff;
+      border-radius: 8px;
     }
 
-    .romaji-line {
+    .sample-text {
       font-family: "Courier New", monospace;
-      font-size: 1.7em;
-      letter-spacing: 2px;
+      font-size: 1.4em;
+      letter-spacing: 1px;
       background-color: #f5f5f7;
       border-radius: 8px;
       padding: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      line-height: 1.9;
       word-break: break-all;
-      transition: background-color 0.15s;
-    }
-
-    .romaji-line.shake {
-      background-color: #ffe3e6;
     }
 
     .char-correct {
       color: #2b8a3e;
+    }
+
+    .char-wrong {
+      color: #ffffff;
+      background-color: #ef233c;
+      border-radius: 2px;
     }
 
     .char-current {
@@ -124,18 +150,28 @@
       color: #bbb;
     }
 
-    .meaning-box {
-      text-align: left;
-      background-color: #f0f4ff;
+    #typing-input {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: "Courier New", monospace;
+      font-size: 1.3em;
+      letter-spacing: 1px;
+      padding: 16px;
+      border: 2px solid #ddd;
       border-radius: 8px;
-      padding: 14px 18px;
-      color: #444;
-      font-size: 0.95em;
+      resize: none;
+      height: 100px;
+    }
+
+    #typing-input:focus {
+      outline: none;
+      border-color: #ef233c;
     }
 
     /* 結果画面 */
     #result-screen {
       display: none;
+      text-align: center;
     }
 
     .result-numbers {
@@ -179,28 +215,33 @@
 
     <!-- スタート画面 -->
     <div class="card" id="start-screen">
-      <p>表示されたローマ字の通りに、キーボードで入力してください。</p>
-      <p>何問挑戦しますか?</p>
+      <p>上に見本の文章、下に入力欄が出ます。見本の通りにローマ字で入力してください。</p>
+      <p>文字数を選んでください。</p>
       <div>
-        <button onclick="startGame(5)">5問</button>
-        <button onclick="startGame(10)">10問</button>
-        <button onclick="startGame(15)">15問(全部)</button>
+        <button onclick="startGame(50)">50文字</button>
+        <button onclick="startGame(100)">100文字</button>
+        <button onclick="startGame(200)">200文字</button>
+      </div>
+      <div class="custom-count">
+        <p>文字数を自分で決めることもできます。</p>
+        <input type="number" id="custom-count-input" min="10" max="2000" value="150">
+        <button class="secondary" onclick="startGame(getCustomCount())">この文字数で開始</button>
       </div>
     </div>
 
     <!-- プレイ画面 -->
     <div class="card" id="play-screen">
       <div class="status-bar">
-        <span id="progress-label">1 / 5 問</span>
-        <span id="timer-label">00:00</span>
+        <span id="timer-label">時間: 00:00</span>
+        <span id="progress-label">0 / 0 文字</span>
+        <span id="mistake-label">ミス: 0</span>
       </div>
 
       <div class="kanji-text" id="kanji-text"></div>
-      <div class="reading-text" id="reading-text"></div>
 
-      <div class="romaji-line" id="romaji-line"></div>
+      <div class="sample-text" id="sample-text"></div>
 
-      <div class="meaning-box" id="meaning-box"></div>
+      <textarea id="typing-input" placeholder="ここをクリックしてローマ字で入力を始めてください" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
     </div>
 
     <!-- 結果画面 -->
@@ -214,6 +255,10 @@
         <div class="result-item">
           <div class="value" id="result-accuracy">0%</div>
           <div class="label">正確さ</div>
+        </div>
+        <div class="result-item">
+          <div class="value" id="result-mistakes">0</div>
+          <div class="label">ミスタイプ数</div>
         </div>
         <div class="result-item">
           <div class="value" id="result-time">0秒</div>
@@ -232,30 +277,30 @@
   <script>
     // 練習に使うことわざ一覧(漢字・読み・ローマ字・意味)
     const PROVERBS = [
-      { kanji: "猿も木から落ちる", reading: "さるもきからおちる", romaji: "sarumokikaraochiru", meaning: "どんなに得意なことでも、時には失敗することがある。" },
-      { kanji: "石の上にも三年", reading: "いしのうえにもさんねん", romaji: "ishinouenimosannen", meaning: "辛くても我慢強く続ければ、いつか成功するということ。" },
-      { kanji: "七転び八起き", reading: "ななころびやおき", romaji: "nanakorobiyaoki", meaning: "何度失敗しても、あきらめずに立ち上がること。" },
-      { kanji: "花より団子", reading: "はなよりだんご", romaji: "hanayoridango", meaning: "見た目や風流よりも、実際に役立つものを選ぶこと。" },
-      { kanji: "案ずるより産むが易し", reading: "あんずるよりうむがやすし", romaji: "anzuruyoriumugayasushi", meaning: "心配するよりも、実際にやってみると意外と簡単だということ。" },
-      { kanji: "塵も積もれば山となる", reading: "ちりもつもればやまとなる", romaji: "chirimotsumorebayamatonaru", meaning: "小さなことの積み重ねが、やがて大きな成果になること。" },
-      { kanji: "光陰矢の如し", reading: "こういんやのごとし", romaji: "kouinyanogotoshi", meaning: "月日が経つのは矢のように早いということ。" },
-      { kanji: "二兎を追う者は一兎をも得ず", reading: "にとをおうものはいっとをもえず", romaji: "nitowoumonohaittowomoezu", meaning: "欲張って二つのことを同時にやろうとすると、両方とも失敗するということ。" },
-      { kanji: "井の中の蛙大海を知らず", reading: "いのなかのかわずたいかいをしらず", romaji: "inonakanokawazutaikaiwoshirazu", meaning: "狭い世界しか知らないと、広い世界のことがわからないということ。" },
-      { kanji: "覆水盆に返らず", reading: "ふくすいぼんにかえらず", romaji: "fukusuibonnikaerazu", meaning: "一度してしまったことは、取り返しがつかないということ。" },
-      { kanji: "千里の道も一歩から", reading: "せんりのみちもいっぽから", romaji: "senrinomichimoippokara", meaning: "どんな大きなことも、小さな一歩から始まるということ。" },
-      { kanji: "良薬は口に苦し", reading: "りょうやくはくちににがし", romaji: "ryouyakuhakuchininigashi", meaning: "良い忠告は聞くのが辛いということ。" },
-      { kanji: "灯台下暗し", reading: "とうだいもとくらし", romaji: "toudaimotokurashi", meaning: "身近なことは、かえって気づきにくいということ。" },
-      { kanji: "継続は力なり", reading: "けいぞくはちからなり", romaji: "keizokuhachikaranari", meaning: "何事も続けることが、大きな力になるということ。" },
-      { kanji: "早起きは三文の徳", reading: "はやおきはさんもんのとく", romaji: "hayaokihasanmonnotoku", meaning: "早起きをすると、何かしら良いことがあるということ。" },
+      { kanji: "猿も木から落ちる", romaji: "sarumokikaraochiru" },
+      { kanji: "石の上にも三年", romaji: "ishinouenimosannen" },
+      { kanji: "七転び八起き", romaji: "nanakorobiyaoki" },
+      { kanji: "花より団子", romaji: "hanayoridango" },
+      { kanji: "案ずるより産むが易し", romaji: "anzuruyoriumugayasushi" },
+      { kanji: "塵も積もれば山となる", romaji: "chirimotsumorebayamatonaru" },
+      { kanji: "光陰矢の如し", romaji: "kouinyanogotoshi" },
+      { kanji: "二兎を追う者は一兎をも得ず", romaji: "nitowoumonohaittowomoezu" },
+      { kanji: "井の中の蛙大海を知らず", romaji: "inonakanokawazutaikaiwoshirazu" },
+      { kanji: "覆水盆に返らず", romaji: "fukusuibonnikaerazu" },
+      { kanji: "千里の道も一歩から", romaji: "senrinomichimoippokara" },
+      { kanji: "良薬は口に苦し", romaji: "ryouyakuhakuchininigashi" },
+      { kanji: "灯台下暗し", romaji: "toudaimotokurashi" },
+      { kanji: "継続は力なり", romaji: "keizokuhachikaranari" },
+      { kanji: "早起きは三文の徳", romaji: "hayaokihasanmonnotoku" },
     ];
 
-    let queue = [];
-    let currentIndex = 0;
-    let typed = "";
+    let target = "";
+    let kanjiDisplay = "";
     let sessionStarted = false;
     let startTime = 0;
-    let correctChars = 0;
-    let totalKeystrokes = 0;
+    let mistakeCount = 0;
+    let totalKeyPresses = 0;
+    let prevValueLength = 0;
     let timerInterval = null;
 
     function shuffle(array) {
@@ -267,49 +312,82 @@
       return copy;
     }
 
+    function getCustomCount() {
+      const input = document.getElementById("custom-count-input");
+      const value = parseInt(input.value, 10);
+      if (!value || value < 10) return 50;
+      return value;
+    }
+
+    // 指定した文字数になるまで、ことわざをランダムにつなげて文章を作る
+    function generateText(targetLength) {
+      const kanjiParts = [];
+      const romajiParts = [];
+      let total = 0;
+      let pool = shuffle(PROVERBS);
+      let i = 0;
+
+      while (total < targetLength) {
+        if (i >= pool.length) {
+          pool = shuffle(PROVERBS);
+          i = 0;
+        }
+        const item = pool[i++];
+        kanjiParts.push(item.kanji);
+        romajiParts.push(item.romaji);
+        total += item.romaji.length + 1;
+      }
+
+      return {
+        kanjiDisplay: kanjiParts.join(" ・ "),
+        romajiTarget: romajiParts.join(" "),
+      };
+    }
+
     function startGame(count) {
-      queue = shuffle(PROVERBS).slice(0, count);
-      currentIndex = 0;
-      typed = "";
+      const generated = generateText(count);
+      target = generated.romajiTarget;
+      kanjiDisplay = generated.kanjiDisplay;
+
       sessionStarted = false;
-      correctChars = 0;
-      totalKeystrokes = 0;
+      mistakeCount = 0;
+      totalKeyPresses = 0;
+      prevValueLength = 0;
 
       document.getElementById("start-screen").style.display = "none";
       document.getElementById("result-screen").style.display = "none";
       document.getElementById("play-screen").style.display = "block";
 
-      loadSentence();
+      document.getElementById("kanji-text").textContent = "見本(漢字): " + kanjiDisplay;
+      document.getElementById("timer-label").textContent = "時間: 00:00";
+      document.getElementById("mistake-label").textContent = "ミス: 0";
 
+      const inputEl = document.getElementById("typing-input");
+      inputEl.value = "";
+      inputEl.maxLength = target.length;
+      inputEl.disabled = false;
+      inputEl.focus();
+
+      renderSampleText("");
+
+      clearInterval(timerInterval);
       timerInterval = setInterval(updateTimerLabel, 200);
     }
 
-    function loadSentence() {
-      const item = queue[currentIndex];
-      typed = "";
-      document.getElementById("kanji-text").textContent = item.kanji;
-      document.getElementById("reading-text").textContent = item.reading;
-      document.getElementById("meaning-box").textContent = "意味: " + item.meaning;
-      document.getElementById("progress-label").textContent =
-        (currentIndex + 1) + " / " + queue.length + " 問";
-      renderRomaji();
-    }
-
-    function renderRomaji() {
-      const item = queue[currentIndex];
-      const target = item.romaji;
+    function renderSampleText(typed) {
       let html = "";
       for (let i = 0; i < target.length; i++) {
-        const ch = target[i];
+        const ch = target[i] === " " ? "&nbsp;" : target[i];
         if (i < typed.length) {
-          html += '<span class="char-correct">' + ch + '</span>';
+          const cls = typed[i] === target[i] ? "char-correct" : "char-wrong";
+          html += '<span class="' + cls + '">' + ch + '</span>';
         } else if (i === typed.length) {
           html += '<span class="char-current">' + ch + '</span>';
         } else {
           html += '<span class="char-pending">' + ch + '</span>';
         }
       }
-      document.getElementById("romaji-line").innerHTML = html;
+      document.getElementById("sample-text").innerHTML = html;
     }
 
     function updateTimerLabel() {
@@ -317,59 +395,42 @@
       const elapsed = Math.floor((performance.now() - startTime) / 1000);
       const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
       const ss = String(elapsed % 60).padStart(2, "0");
-      document.getElementById("timer-label").textContent = mm + ":" + ss;
+      document.getElementById("timer-label").textContent = "時間: " + mm + ":" + ss;
     }
 
-    function flashError() {
-      const line = document.getElementById("romaji-line");
-      line.classList.add("shake");
-      setTimeout(() => line.classList.remove("shake"), 150);
-    }
-
-    document.addEventListener("keydown", (e) => {
-      if (document.getElementById("play-screen").style.display !== "block") return;
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.key.length !== 1) return; // Shift, Enter, Backspaceなどは無視
-
+    document.getElementById("typing-input").addEventListener("paste", (e) => {
       e.preventDefault();
+    });
 
-      const item = queue[currentIndex];
-      const target = item.romaji;
-      const expected = target[typed.length];
-      const key = e.key.toLowerCase();
+    document.getElementById("typing-input").addEventListener("input", (e) => {
+      const value = e.target.value;
 
-      if (key === expected) {
-        typed += key;
-        correctChars++;
-        totalKeystrokes++;
-
+      if (value.length > prevValueLength) {
+        // 新しい文字が追加された
+        const idx = value.length - 1;
+        totalKeyPresses++;
+        if (value[idx] !== target[idx]) {
+          mistakeCount++;
+        }
         if (!sessionStarted) {
           sessionStarted = true;
           startTime = performance.now();
         }
+      }
+      prevValueLength = value.length;
 
-        renderRomaji();
+      renderSampleText(value);
+      document.getElementById("progress-label").textContent = value.length + " / " + target.length + " 文字";
+      document.getElementById("mistake-label").textContent = "ミス: " + mistakeCount;
 
-        if (typed.length === target.length) {
-          setTimeout(nextSentence, 300);
-        }
-      } else {
-        totalKeystrokes++;
-        flashError();
+      if (value.length >= target.length) {
+        finishGame();
       }
     });
 
-    function nextSentence() {
-      currentIndex++;
-      if (currentIndex >= queue.length) {
-        finishGame();
-      } else {
-        loadSentence();
-      }
-    }
-
     function finishGame() {
       clearInterval(timerInterval);
+      document.getElementById("typing-input").disabled = true;
       document.getElementById("play-screen").style.display = "none";
       document.getElementById("result-screen").style.display = "block";
 
@@ -377,14 +438,15 @@
         ? (performance.now() - startTime) / 1000
         : 0;
       const speed = elapsedSeconds > 0
-        ? Math.round((correctChars / elapsedSeconds) * 60)
+        ? Math.round((target.length / elapsedSeconds) * 60)
         : 0;
-      const accuracy = totalKeystrokes > 0
-        ? Math.round((correctChars / totalKeystrokes) * 100)
+      const accuracy = totalKeyPresses > 0
+        ? Math.round(((totalKeyPresses - mistakeCount) / totalKeyPresses) * 100)
         : 100;
 
       document.getElementById("result-speed").textContent = speed;
       document.getElementById("result-accuracy").textContent = accuracy + "%";
+      document.getElementById("result-mistakes").textContent = mistakeCount;
       document.getElementById("result-time").textContent = Math.round(elapsedSeconds) + "秒";
     }
 
