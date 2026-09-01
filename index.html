@@ -79,6 +79,29 @@
       background-color: #d90429;
     }
 
+    /* SNSボタンを横並びにする箱 */
+    .sns-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    a.sns-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background-color: #2b2d42;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    a.sns-link:hover {
+      background-color: #454873;
+    }
+
     footer {
       text-align: center;
       padding: 20px;
@@ -126,6 +149,20 @@
         <li>企業SNSアカウントのショート動画制作</li>
         <li>友人のイベント動画の撮影・編集</li>
       </ul>
+    </section>
+
+    <!-- SNS -->
+    <section>
+      <h2>SNS</h2>
+      <p>普段の活動はこちらでも発信しています。</p>
+      <div class="sns-links">
+        <a class="sns-link" href="https://www.tiktok.com/@tamatentamaten" target="_blank" rel="noopener noreferrer">
+          <span>🎵</span> TikTok
+        </a>
+        <a class="sns-link" href="https://www.lemon8-app.com/@tamatentamaten?region=jp" target="_blank" rel="noopener noreferrer">
+          <span>🍋</span> Lemon8
+        </a>
+      </div>
     </section>
 
     <!-- 連絡先 -->
