@@ -248,6 +248,10 @@
         </select>
         <button onclick="startGame(parseInt(document.getElementById('count-select').value, 10))">この文字数で開始</button>
       </div>
+      <div class="custom-count">
+        <p>音が鳴るか、先に確認できます。</p>
+        <button class="secondary" onclick="playCorrectSound()">🔊 テスト音を鳴らす</button>
+      </div>
     </div>
 
     <!-- プレイ画面 -->
@@ -383,17 +387,17 @@
     }
 
     function playCorrectSound() {
-      playTone(700, 0.05, "sine", 0.08);
+      playTone(700, 0.06, "sine", 0.18);
     }
 
     function playMistakeSound() {
-      playTone(180, 0.12, "square", 0.12);
+      playTone(180, 0.14, "square", 0.22);
     }
 
     function playFinishSound() {
-      playTone(523, 0.15, "sine", 0.12);
-      setTimeout(() => playTone(659, 0.15, "sine", 0.12), 150);
-      setTimeout(() => playTone(784, 0.3, "sine", 0.12), 300);
+      playTone(523, 0.15, "sine", 0.2);
+      setTimeout(() => playTone(659, 0.15, "sine", 0.2), 150);
+      setTimeout(() => playTone(784, 0.3, "sine", 0.2), 300);
     }
 
     function toggleSound() {
