@@ -79,8 +79,8 @@
       border-top: 1px solid #eee;
     }
 
-    .custom-count input[type="number"] {
-      width: 100px;
+    .custom-count input[type="number"],
+    .custom-count select {
       padding: 10px;
       font-size: 1em;
       border: 1px solid #ccc;
@@ -208,24 +208,29 @@
 
   <header>
     <h1>タイピング練習 ⌨️</h1>
-    <p>日本語のことわざで、ローマ字入力の練習をしよう</p>
+    <p>日本語のことわざを、日本語のまま入力する練習をしよう</p>
   </header>
 
   <main>
 
     <!-- スタート画面 -->
     <div class="card" id="start-screen">
-      <p>上に見本の文章、下に入力欄が出ます。見本の通りにローマ字で入力してください。</p>
-      <p>文字数を選んでください。</p>
-      <div>
-        <button onclick="startGame(50)">50文字</button>
-        <button onclick="startGame(100)">100文字</button>
-        <button onclick="startGame(200)">200文字</button>
-      </div>
-      <div class="custom-count">
-        <p>文字数を自分で決めることもできます。</p>
-        <input type="number" id="custom-count-input" min="10" max="2000" value="150">
-        <button class="secondary" onclick="startGame(getCustomCount())">この文字数で開始</button>
+      <p>上に見本の日本語の文章、下に入力欄が出ます。いつも使っているIME(ローマ字入力→漢字変換)で、見本の通りに入力してください。</p>
+      <p>文字数を選んでください(100文字単位で1000文字まで選べます)。</p>
+      <div class="custom-count" style="border-top: none; padding-top: 0; margin-top: 10px;">
+        <select id="count-select">
+          <option value="100">100文字</option>
+          <option value="200">200文字</option>
+          <option value="300">300文字</option>
+          <option value="400">400文字</option>
+          <option value="500">500文字</option>
+          <option value="600">600文字</option>
+          <option value="700">700文字</option>
+          <option value="800">800文字</option>
+          <option value="900">900文字</option>
+          <option value="1000">1000文字</option>
+        </select>
+        <button onclick="startGame(parseInt(document.getElementById('count-select').value, 10))">この文字数で開始</button>
       </div>
     </div>
 
@@ -237,11 +242,11 @@
         <span id="mistake-label">ミス: 0</span>
       </div>
 
-      <div class="kanji-text" id="kanji-text"></div>
+      <div class="kanji-text" id="reading-hint"></div>
 
       <div class="sample-text" id="sample-text"></div>
 
-      <textarea id="typing-input" placeholder="ここをクリックしてローマ字で入力を始めてください" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <textarea id="typing-input" placeholder="ここをクリックして、IMEで日本語を入力してください" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
     </div>
 
     <!-- 結果画面 -->
@@ -275,27 +280,27 @@
   </footer>
 
   <script>
-    // 練習に使うことわざ一覧(漢字・読み・ローマ字・意味)
+    // 練習に使うことわざ一覧(漢字・読み)
     const PROVERBS = [
-      { kanji: "猿も木から落ちる", romaji: "sarumokikaraochiru" },
-      { kanji: "石の上にも三年", romaji: "ishinouenimosannen" },
-      { kanji: "七転び八起き", romaji: "nanakorobiyaoki" },
-      { kanji: "花より団子", romaji: "hanayoridango" },
-      { kanji: "案ずるより産むが易し", romaji: "anzuruyoriumugayasushi" },
-      { kanji: "塵も積もれば山となる", romaji: "chirimotsumorebayamatonaru" },
-      { kanji: "光陰矢の如し", romaji: "kouinyanogotoshi" },
-      { kanji: "二兎を追う者は一兎をも得ず", romaji: "nitowoumonohaittowomoezu" },
-      { kanji: "井の中の蛙大海を知らず", romaji: "inonakanokawazutaikaiwoshirazu" },
-      { kanji: "覆水盆に返らず", romaji: "fukusuibonnikaerazu" },
-      { kanji: "千里の道も一歩から", romaji: "senrinomichimoippokara" },
-      { kanji: "良薬は口に苦し", romaji: "ryouyakuhakuchininigashi" },
-      { kanji: "灯台下暗し", romaji: "toudaimotokurashi" },
-      { kanji: "継続は力なり", romaji: "keizokuhachikaranari" },
-      { kanji: "早起きは三文の徳", romaji: "hayaokihasanmonnotoku" },
+      { kanji: "猿も木から落ちる", reading: "さるもきからおちる" },
+      { kanji: "石の上にも三年", reading: "いしのうえにもさんねん" },
+      { kanji: "七転び八起き", reading: "ななころびやおき" },
+      { kanji: "花より団子", reading: "はなよりだんご" },
+      { kanji: "案ずるより産むが易し", reading: "あんずるよりうむがやすし" },
+      { kanji: "塵も積もれば山となる", reading: "ちりもつもればやまとなる" },
+      { kanji: "光陰矢の如し", reading: "こういんやのごとし" },
+      { kanji: "二兎を追う者は一兎をも得ず", reading: "にとをおうものはいっとをもえず" },
+      { kanji: "井の中の蛙大海を知らず", reading: "いのなかのかわずたいかいをしらず" },
+      { kanji: "覆水盆に返らず", reading: "ふくすいぼんにかえらず" },
+      { kanji: "千里の道も一歩から", reading: "せんりのみちもいっぽから" },
+      { kanji: "良薬は口に苦し", reading: "りょうやくはくちににがし" },
+      { kanji: "灯台下暗し", reading: "とうだいもとくらし" },
+      { kanji: "継続は力なり", reading: "けいぞくはちからなり" },
+      { kanji: "早起きは三文の徳", reading: "はやおきはさんもんのとく" },
     ];
 
     let target = "";
-    let kanjiDisplay = "";
+    let readingHint = "";
     let sessionStarted = false;
     let startTime = 0;
     let mistakeCount = 0;
@@ -312,17 +317,10 @@
       return copy;
     }
 
-    function getCustomCount() {
-      const input = document.getElementById("custom-count-input");
-      const value = parseInt(input.value, 10);
-      if (!value || value < 10) return 50;
-      return value;
-    }
-
     // 指定した文字数になるまで、ことわざをランダムにつなげて文章を作る
     function generateText(targetLength) {
       const kanjiParts = [];
-      const romajiParts = [];
+      const readingParts = [];
       let total = 0;
       let pool = shuffle(PROVERBS);
       let i = 0;
@@ -333,21 +331,21 @@
           i = 0;
         }
         const item = pool[i++];
-        kanjiParts.push(item.kanji);
-        romajiParts.push(item.romaji);
-        total += item.romaji.length + 1;
+        kanjiParts.push(item.kanji + "。");
+        readingParts.push(item.reading);
+        total += item.kanji.length + 1;
       }
 
       return {
-        kanjiDisplay: kanjiParts.join(" ・ "),
-        romajiTarget: romajiParts.join(" "),
+        text: kanjiParts.join(""),
+        readingHint: readingParts.join(" ・ "),
       };
     }
 
     function startGame(count) {
       const generated = generateText(count);
-      target = generated.romajiTarget;
-      kanjiDisplay = generated.kanjiDisplay;
+      target = generated.text;
+      readingHint = generated.readingHint;
 
       sessionStarted = false;
       mistakeCount = 0;
@@ -358,13 +356,12 @@
       document.getElementById("result-screen").style.display = "none";
       document.getElementById("play-screen").style.display = "block";
 
-      document.getElementById("kanji-text").textContent = "見本(漢字): " + kanjiDisplay;
+      document.getElementById("reading-hint").textContent = "よみ: " + readingHint;
       document.getElementById("timer-label").textContent = "時間: 00:00";
       document.getElementById("mistake-label").textContent = "ミス: 0";
 
       const inputEl = document.getElementById("typing-input");
       inputEl.value = "";
-      inputEl.maxLength = target.length;
       inputEl.disabled = false;
       inputEl.focus();
 
@@ -377,7 +374,7 @@
     function renderSampleText(typed) {
       let html = "";
       for (let i = 0; i < target.length; i++) {
-        const ch = target[i] === " " ? "&nbsp;" : target[i];
+        const ch = target[i];
         if (i < typed.length) {
           const cls = typed[i] === target[i] ? "char-correct" : "char-wrong";
           html += '<span class="' + cls + '">' + ch + '</span>';
@@ -403,14 +400,18 @@
     });
 
     document.getElementById("typing-input").addEventListener("input", (e) => {
+      // 変換中(IMEで文字を選んでいる途中)は判定しない。確定したときだけ処理する
+      if (e.isComposing) return;
+
       const value = e.target.value;
 
       if (value.length > prevValueLength) {
-        // 新しい文字が追加された
-        const idx = value.length - 1;
-        totalKeyPresses++;
-        if (value[idx] !== target[idx]) {
-          mistakeCount++;
+        // 新しく確定した文字ぶんをまとめて判定する(IMEは複数文字を一度に確定することがある)
+        for (let idx = prevValueLength; idx < value.length && idx < target.length; idx++) {
+          totalKeyPresses++;
+          if (value[idx] !== target[idx]) {
+            mistakeCount++;
+          }
         }
         if (!sessionStarted) {
           sessionStarted = true;
@@ -420,7 +421,8 @@
       prevValueLength = value.length;
 
       renderSampleText(value);
-      document.getElementById("progress-label").textContent = value.length + " / " + target.length + " 文字";
+      const shownLength = Math.min(value.length, target.length);
+      document.getElementById("progress-label").textContent = shownLength + " / " + target.length + " 文字";
       document.getElementById("mistake-label").textContent = "ミス: " + mistakeCount;
 
       if (value.length >= target.length) {
